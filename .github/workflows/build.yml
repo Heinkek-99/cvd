@@ -18,14 +18,11 @@ jobs:
         uses: dante-ev/latex-action@latest
         with:
           root_file: ${{ env.FILE }}
-          working_directory: ${{ env.DIR }}
-      - name: move
-        run: mkdir -p github_artifacts && mv ${{ env.DIR }} ./github_artifacts/
       - name: Upload pdf as artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.FILE }}.pdf
-          path: ./github_artifacts
+          path: ./${{ env.FILE }}.pdf
   deploy:
     needs: [build]
     runs-on: ubuntu-latest
@@ -34,16 +31,14 @@ jobs:
         uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          path: github_artifacts
-      - name: move
-        run: mkdir -p github_deploy && mv github_artifacts/*.pdf github_deploy
-      - name: List files in github_artifacts
-        run: ls -la github_artifacts
+          name : ${{ env.FILE }}.pdf
+          path: ./
+      
       - name: deploy on orphan branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./github_deploy
+          publish_dir: ./
           publish_branch: build
           force_orphan: true
           enable_jekyll: true
